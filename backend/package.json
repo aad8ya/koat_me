@@ -10,11 +10,13 @@
     "prisma": "^6.6.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.7.0",
     "nodemon": "^3.1.9"
   },
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "setup:db": "npx prisma generate && npx prisma migrate dev --name init"
+    "setup:db": "npx prisma generate && npx prisma migrate dev --name init",
+    "seed": "node prisma/seed.js"
   }
 }
