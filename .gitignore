@@ -1,0 +1,41 @@
+# Shared
+.env
+*.log
+.vscode/
+.idea/
+.DS_Store
+
+# Node dependencies
+**/node_modules/
+**/dist/
+**/.yarn/
+
+# Build artifacts
+**/build/
+**/.turbo/
+**/.output/
+**/.cache/
+**/.parcel-cache/
+
+# Dependency lock files (keep one of yarn.lock or package-lock.json if needed)
+**/package-lock.json
+.pnpm-debug.log
+.yarn-integrity
+
+# Prisma artifacts (but keep schema.prisma)
+backend/prisma/migrations/
+backend/prisma/dev.db
+backend/prisma/.env
+backend/src/generated/prisma/
+
+# Docker
+pgdata/
+*.local
+
+# Optional editor configs
+**/.editorconfig
+**/.eslintcache
+
+# OS junk
+Thumbs.db
+ehthumbs.db
