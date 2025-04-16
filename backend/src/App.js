@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import { submitQuote } from "./controllers/quoteController.js";
+import { submitQuote, getQuotes } from "./controllers/quoteController.js";
 import { addRoofType, getRoofTypes } from "./controllers/roofTypeController.js";
 
 export const createApp = () => {
@@ -14,6 +14,7 @@ export const createApp = () => {
 
   // Routes
   app.post("/api/submit", submitQuote);
+  app.get("/api/quotes", getQuotes);
   app.post("/api/roof-types", addRoofType);
   app.get("/api/roof-types", getRoofTypes);
 
