@@ -8,13 +8,24 @@ const roofTypes = ["Metal", "TPO", "Foam", "Shingle", "Clay Tile", "Asphalt"];
 async function main() {
   console.log("🌱 Seeding database with mock quotes...");
 
+  const roofTypeMap = {};
+
+  for (const name of roofTypes) {
+    const roofType = await prisma.roofType.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+    roofTypeMap[name] = roofType.id;
+  }
+
   const quotes = Array.from({ length: 1000 }, () => ({
     contractor: faker.person.fullName(),
     company: faker.company.name(),
     roofSize: parseFloat(
       faker.number.float({ min: 500, max: 10000 }).toFixed(2)
     ),
-    roofType: faker.helpers.arrayElement(roofTypes),
+    roofTypeId: roofTypeMap[faker.helpers.arrayElement(roofTypes)],
     city: faker.location.city(),
     state: faker.location.state({ abbreviated: true }),
     projectDate: faker.date.between({ from: "2023-01-01", to: "2025-01-01" }),
@@ -30,7 +41,7 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error("❌ Seeding failed:", e);
     process.exit(1);
   })
   .finally(() => {
