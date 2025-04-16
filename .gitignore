@@ -23,7 +23,6 @@
 .yarn-integrity
 
 # Prisma artifacts (but keep schema.prisma)
-backend/prisma/migrations/
 backend/prisma/dev.db
 backend/prisma/.env
 backend/src/generated/prisma/
