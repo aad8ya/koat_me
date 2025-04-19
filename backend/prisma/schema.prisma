@@ -69,8 +69,9 @@ enum State {
 }
 
 model RoofType {
-  id    Int     @id @default(autoincrement())
-  name  String  @unique
+  id             Int     @id @default(autoincrement())
+  name           String  @unique
+  energySavings  Float?
   Quote Quote[]
 }
 
