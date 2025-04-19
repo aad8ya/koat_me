@@ -1,14 +1,21 @@
 import { prisma } from "../lib/prismaClient.js";
 
 export const submitQuote = async (req, res) => {
-  const { contractor, company, roofSize, roofType, city, state, projectDate } =
-    req.body;
+  const {
+    contractor,
+    company,
+    roofSize,
+    roofTypeId,
+    city,
+    state,
+    projectDate,
+  } = req.body;
 
   if (
     !contractor ||
     !company ||
     !roofSize ||
-    !roofType ||
+    !roofTypeId ||
     !city ||
     !state ||
     !projectDate
@@ -22,7 +29,7 @@ export const submitQuote = async (req, res) => {
         contractor,
         company,
         roofSize: parseFloat(roofSize),
-        roofType,
+        roofTypeId: parseInt(roofTypeId),
         city,
         state,
         projectDate: new Date(projectDate),
