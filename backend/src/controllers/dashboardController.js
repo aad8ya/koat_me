@@ -75,7 +75,7 @@ const fetchMonthlyProjects = async (filters) => {
 
   const monthlyMap = {};
   filteredQuotes.forEach(({ projectDate }) => {
-    const month = format(new Date(projectDate), "yyyy-MM"); // e.g., '2025-04'
+    const month = format(new Date(projectDate), "yyyy-MM");
     if (!monthlyMap[month]) monthlyMap[month] = 0;
     monthlyMap[month]++;
   });
@@ -92,26 +92,51 @@ export const getDashboardSummary = async (req, res) => {
     const { state, roofTypeId, startDate, endDate } = req.query;
 
     const filters = {};
-    if (state) filters.state = state;
-    if (roofTypeId) filters.roofTypeId = parseInt(roofTypeId);
+    if (state) filters.state = { in: req.query.state?.split(",") };
+    if (roofTypeId)
+      filters.roofTypeId = { in: req.query.roofTypeId?.split(",").map(Number) };
     if (startDate || endDate) {
       filters.projectDate = {};
       if (startDate) filters.projectDate.gte = new Date(startDate);
       if (endDate) filters.projectDate.lte = new Date(endDate);
     }
 
-    console.log(filters);
+    const [
+      projectsByState,
+      avgRoofSizeByType,
+      energySavingsByType,
+      monthlyProjects,
+      totalProjects,
+      avgRoofSizeAgg,
+    ] = await Promise.all([
+      fetchProjectsByState(filters),
+      fetchAvgRoofSizeByType(filters),
+      fetchEnergySavingsByType(filters),
+      fetchMonthlyProjects(filters),
+      prisma.quote.count({ where: filters }),
+      prisma.quote.aggregate({
+        where: filters,
+        _avg: { roofSize: true },
+      }),
+    ]);
 
-    const projectsByState = await fetchProjectsByState(filters);
-    const avgRoofSizeByType = await fetchAvgRoofSizeByType(filters);
-    const energySavingsByType = await fetchEnergySavingsByType(filters);
-    const monthlyProjects = await fetchMonthlyProjects(filters);
+    const totalEnergySaved = energySavingsByType.reduce(
+      (acc, curr) => acc + curr.totalKwhSaved,
+      0
+    );
 
     return res.status(200).json({
       projectsByState,
       avgRoofSizeByType,
       energySavingsByType,
       monthlyProjects,
+      summaryStats: {
+        totalProjects,
+        avgRoofSize: parseFloat(
+          avgRoofSizeAgg._avg.roofSize?.toFixed(2) || "0"
+        ),
+        totalEnergySaved: parseFloat(totalEnergySaved.toFixed(2)),
+      },
     });
   } catch (err) {
     console.error("Dashboard summary error:", err);
