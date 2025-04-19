@@ -1,5 +1,4 @@
 <script setup>
-import QuoteForm from "./components/QuoteForm.vue";
 import { NMessageProvider, NConfigProvider } from "naive-ui";
 import { PRIMARY_BLUE } from "./styles/theme";
 
@@ -14,7 +13,7 @@ const themeOverrides = {
 <template>
   <n-config-provider :theme-overrides="themeOverrides">
     <n-message-provider>
-      <QuoteForm />
+      <router-view />
     </n-message-provider>
   </n-config-provider>
 </template>
