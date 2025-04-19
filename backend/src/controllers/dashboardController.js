@@ -124,22 +124,20 @@ export const getDashboardSummary = async (req, res) => {
       (acc, curr) => acc + curr.totalKwhSaved,
       0
     );
-    setTimeout(() => {
-      return res.status(200).json({
-        projectsByState,
-        avgRoofSizeByType,
-        energySavingsByType,
-        monthlyProjects,
-        summaryStats: {
-          totalProjects,
-          avgRoofSize: parseFloat(
-            avgRoofSizeAgg._avg.roofSize?.toFixed(2) || "0"
-          ),
-          totalEnergySaved: parseFloat(totalEnergySaved.toFixed(2)),
-        },
-      });
-      console.log("Delayed for 5 second.");
-    }, "5000");
+
+    return res.status(200).json({
+      projectsByState,
+      avgRoofSizeByType,
+      energySavingsByType,
+      monthlyProjects,
+      summaryStats: {
+        totalProjects,
+        avgRoofSize: parseFloat(
+          avgRoofSizeAgg._avg.roofSize?.toFixed(2) || "0"
+        ),
+        totalEnergySaved: parseFloat(totalEnergySaved.toFixed(2)),
+      },
+    });
   } catch (err) {
     console.error("Dashboard summary error:", err);
     res.status(500).json({ error: "Failed to fetch dashboard data" });
