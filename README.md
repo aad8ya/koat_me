@@ -6,19 +6,6 @@
 
 A full-stack quote portal and performance dashboard tailored for roofing projects. Users can submit project quotes, while admins or business users can visualize aggregated data through insightful charts and summaries.
 
-## 📖 Table of Contents
-
-- [🧠 Abstract](#-abstract)
-- [⚙️ Setup Instructions](#-setup-instructions)
-- [✨ Extras](#-extras)
-- [🚀 What Can Be Improved](#-what-can-be-improved)
-- [📸 Gallery] (#-gallery)
-- [📚 Documentation](#-docs)
-  - [Frontend](#frontend)
-  - [Backend](#backend)
-  - [API Endpoints](#api-endpoints)
-  - [Database Schema](#database-schema)
-
 ## 🧠 Abstract
 
 Koat-Me is a modern full-stack web application that supports:
@@ -102,6 +89,7 @@ This runs:
 
 ```bash
 # To kill processes spawned by startup script
+
 lsof -i :5001 # or your port if modified in.env
 kill -9 <pid>
 lsof -i :5002 # or your port if modified in.env
