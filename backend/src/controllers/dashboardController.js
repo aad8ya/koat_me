@@ -75,7 +75,7 @@ const fetchMonthlyProjects = async (filters) => {
 
   const monthlyMap = {};
   filteredQuotes.forEach(({ projectDate }) => {
-    const month = format(new Date(projectDate), "yyyy-MM"); // e.g., '2025-04'
+    const month = format(new Date(projectDate), "yyyy-MM");
     if (!monthlyMap[month]) monthlyMap[month] = 0;
     monthlyMap[month]++;
   });
