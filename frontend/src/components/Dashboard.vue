@@ -1,7 +1,15 @@
 <template>
   <div class="dashboard-container">
-    <n-card :title="renderTitle" size="large" embedded class="dashboard-card">
-      <!-- Filters -->
+    <n-card size="large" embedded class="dashboard-card">
+      <template #header>
+        <div class="dashboard-header">
+          <div class="dashboard-title">Performance Dashboard</div>
+          <n-button round ghost color="white" @click="exportPdf">
+            ⇪ Export PDF
+          </n-button>
+        </div>
+      </template>
+
       <div class="filters-card">
         <n-grid cols="1 s:2 m:5" x-gap="8" y-gap="16" responsive="screen">
           <n-grid-item>
@@ -53,54 +61,56 @@
         </n-grid>
       </div>
 
-      <!-- Summary Stats -->
-      <div class="summary-section">
-        <SummaryStats :summary="summary.summaryStats" :loading="isLoading" />
+      <div ref="pdfContent">
+        <div class="summary-section">
+          <SummaryStats :summary="summary.summaryStats" :loading="isLoading" />
+        </div>
+
+        <n-space vertical :size="20">
+          <n-grid cols="1 s:2" x-gap="20" y-gap="20" responsive="screen">
+            <n-grid-item>
+              <ChartCard title="Average Roof Size (sq. ft.) by Type">
+                <AverageRoofSizeChart
+                  :data="summary.avgRoofSizeByType"
+                  :loading="isLoading"
+                />
+              </ChartCard>
+            </n-grid-item>
+            <n-grid-item>
+              <ChartCard title="Estimated Energy Savings (kWh)">
+                <EnergySavingsChart
+                  :data="summary.energySavingsByType"
+                  :loading="isLoading"
+                />
+              </ChartCard>
+            </n-grid-item>
+          </n-grid>
+
+          <ChartCard title="Projects per Month">
+            <MonthlyTrendChart
+              :data="summary.monthlyProjects"
+              :loading="isLoading"
+            />
+          </ChartCard>
+
+          <ChartCard title="Projects by State">
+            <ProjectsByState
+              :data="summary.projectsByState"
+              :states="stateOptions"
+              :loading="isLoading"
+              :isPdfExport="isPdfExport"
+            />
+          </ChartCard>
+        </n-space>
       </div>
-
-      <!-- Charts -->
-      <n-space vertical :size="20">
-        <n-grid cols="1 s:2" x-gap="20" y-gap="20" responsive="screen">
-          <n-grid-item>
-            <ChartCard title="Average Roof Size (sq. ft.) by Type">
-              <AverageRoofSizeChart
-                :data="summary.avgRoofSizeByType"
-                :loading="isLoading"
-              />
-            </ChartCard>
-          </n-grid-item>
-          <n-grid-item>
-            <ChartCard title="Estimated Energy Savings (kWh)">
-              <EnergySavingsChart
-                :data="summary.energySavingsByType"
-                :loading="isLoading"
-              />
-            </ChartCard>
-          </n-grid-item>
-        </n-grid>
-
-        <ChartCard title="Projects per Month">
-          <MonthlyTrendChart
-            :data="summary.monthlyProjects"
-            :loading="isLoading"
-          />
-        </ChartCard>
-
-        <ChartCard title="Projects by State">
-          <ProjectsByState
-            :data="summary.projectsByState"
-            :states="stateOptions"
-            :loading="isLoading"
-          />
-        </ChartCard>
-      </n-space>
     </n-card>
   </div>
 </template>
 
 <script setup>
-import { ref, h, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { api } from "@/api";
+import html2pdf from "html2pdf.js";
 import {
   NCard,
   NDatePicker,
@@ -120,6 +130,8 @@ import MonthlyTrendChart from "./charts/MonthlyTrendChart.vue";
 
 const summary = ref({});
 const isLoading = ref(false);
+const isPdfExport = ref(false);
+const pdfContent = ref(null);
 
 const filters = ref({
   startDate: null,
@@ -129,7 +141,6 @@ const filters = ref({
 });
 
 const roofTypeOptions = ref([]);
-
 const stateOptions = [
   { label: "Alabama", value: "AL" },
   { label: "Alaska", value: "AK" },
@@ -203,18 +214,8 @@ async function fetchRoofTypes() {
   }
 }
 
-onMounted(() => {
-  fetchRoofTypes();
-  fetchSummary();
-});
-
 function resetFilters() {
-  filters.value = {
-    startDate: null,
-    endDate: null,
-    state: [],
-    roofTypeId: [],
-  };
+  filters.value = { startDate: null, endDate: null, state: [], roofTypeId: [] };
   fetchSummary();
 }
 
@@ -225,7 +226,6 @@ function applyFilters() {
     payload.startDate = new Date(filters.value.startDate).toISOString();
   if (filters.value.endDate)
     payload.endDate = new Date(filters.value.endDate).toISOString();
-
   if (filters.value.state?.length)
     payload.state = filters.value.state.join(",");
   if (filters.value.roofTypeId?.length)
@@ -234,12 +234,29 @@ function applyFilters() {
   fetchSummary(payload);
 }
 
-const renderTitle = () =>
-  h(
-    "div",
-    { style: "font-size: 1.75rem; font-weight: bold; color: #ffffff" },
-    "Performance Dashboard"
-  );
+function exportPdf() {
+  isPdfExport.value = true;
+
+  const opt = {
+    filename: `koat-dashboard-${new Date().toISOString().split("T")[0]}.pdf`,
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: "in", format: "a4", orientation: "landscape" },
+  };
+
+  html2pdf()
+    .set(opt)
+    .from(pdfContent.value)
+    .save()
+    .then(() => {
+      isPdfExport.value = false;
+    });
+}
+
+onMounted(() => {
+  fetchRoofTypes();
+  fetchSummary();
+});
 </script>
 
 <style scoped>
@@ -252,6 +269,18 @@ const renderTitle = () =>
 .dashboard-card {
   background-color: #1e3a8a;
   border-color: #1e3a8a;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-title {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #ffffff;
 }
 
 .filters-card {

@@ -15,6 +15,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  isPdfExport: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const hasData = computed(() => props.data.length > 0);
@@ -43,7 +47,7 @@ const tableData = computed(() =>
 </script>
 
 <template>
-  <div class="scroll-wrapper">
+  <div :class="['table-wrapper', { scrollable: !props.isPdfExport }]">
     <NSpin v-if="loading" size="large" />
     <n-data-table
       v-else-if="hasData"
@@ -52,7 +56,6 @@ const tableData = computed(() =>
       :bordered="false"
       striped
       size="large"
-      class="scroll-table"
     />
     <p v-else style="text-align: center; color: #1e3a8a; padding: 12px">
       No data available
@@ -61,13 +64,17 @@ const tableData = computed(() =>
 </template>
 
 <style scoped>
-.scroll-wrapper {
-  max-height: 320px;
+.table-wrapper {
   width: 100%;
+}
+
+.scrollable {
+  max-height: 320px;
   overflow-y: auto;
   scrollbar-width: none;
 }
-.scroll-wrapper::-webkit-scrollbar {
+
+.scrollable::-webkit-scrollbar {
   display: none;
 }
 
